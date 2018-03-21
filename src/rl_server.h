@@ -14,8 +14,21 @@
 #include <ev.h>
 // #include <leveldb/db.h>
 // #include <leveldb/options.h>
-#define _FILE_OFFSET_BITS 64
-#include "offdb/QuickdbAdapter.h"
+//#define _FILE_OFFSET_BITS 64
+//#include "offdb/QuickdbAdapter.h"
+#include "core/dezhoukv.h"
+class DezhouKVAdapter {
+public:
+  DezhouKVAdapter() {
+    init();
+  }
+  inline int _get(const char* key, std::string &value) {
+    return get(key, value);
+  }
+  inline int _set(const char* key, std::string value) {
+    return set(key,value);
+  } 
+};
 
 class RLServer{
 
@@ -32,8 +45,8 @@ public:
     // leveldb::ReadOptions read_options;
     // leveldb::WriteOptions write_options;
     // leveldb::DB **db;
-    QuickdbAdapter **db;
-
+    //QuickdbAdapter **db;
+    DezhouKVAdapter* *db;
     RLServer(const char *db_path, const char *hostaddr, int port, int dbn=0);
     ~RLServer();
     void start();

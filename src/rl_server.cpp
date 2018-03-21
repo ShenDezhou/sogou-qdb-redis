@@ -15,10 +15,11 @@
 #include <netinet/in.h>  /* inet_ntoa */
 #include <arpa/inet.h>   /* inet_ntoa */
 
-
 #include "rl_util.h"
 #include "rl_server.h"
 #include "rl_connection.h"
+
+
 
 #define EVBACKEND EVFLAG_AUTO
 
@@ -42,33 +43,33 @@ RLServer::RLServer(const char *_db_path, const char *_hostaddr, int _port, int d
 
     // leveldb::Status status;
     int ok;
-
+    init();
     if(db_num<1){
         // options = new leveldb::Options[1];
         // options[0].create_if_missing = true;
         // options[0].filter_policy = leveldb::NewBloomFilterPolicy(10);
 
         // db=new leveldb::DB*[1];
-        db=new QuickdbAdapter*[1];
-        db[0] = new QuickdbAdapter();
+        db=new DezhouKVAdapter*[1];
+        //db[0] = new DezhouKVAdapter();
         // status = leveldb::DB::Open(options[0], db_path.c_str(), &db[0]);
         // char buf[16];
         // int count = sprintf(buf, "%d", _port);
-        int ok = db[0]->open(db_path.c_str());
-        if(ok != 0) {
-            printf("leveldb open error:%d", ok);
-            puts("leveldb open error");
-            exit(1);
-        }
+        //int ok = db[0]->open(db_path.c_str());
+        //if(ok != 0) {
+        //    printf("leveldb open error:%d", ok);
+        //    puts("leveldb open error");
+        //    exit(1);
+        //}
     }else{
         // options = new leveldb::Options[db_num];
 
         // db=new leveldb::DB*[db_num];
-        db=new QuickdbAdapter*[db_num];
-        
-        char buf[16];
-        for(int i=0;i<db_num;i++){
-            db[i] = new QuickdbAdapter();
+        db=new DezhouKVAdapter*[db_num];
+        //db[0] = new DezhouKVAdapter();
+        //char buf[16];
+        //for(int i=0;i<db_num;i++){
+            //db[i] = db[0] ;
         
             // options[i].create_if_missing = true;
             // options[i].filter_policy = leveldb::NewBloomFilterPolicy(16);
@@ -77,13 +78,13 @@ RLServer::RLServer(const char *_db_path, const char *_hostaddr, int _port, int d
             //TODO the db path
             // status = leveldb::DB::Open(options[i], (db_path+std::string(buf,count)).c_str(), &db[i]);
             // int count = sprintf(buf, "%d", _port);
-            ok = db[i]->open(db_path.c_str());
-            if (ok != 0) {
-                printf("leveldb open error:%d", ok);
-                puts(buf);
-                exit(1);
-            }
-        }
+            //ok = db[i]->open(db_path.c_str());
+            //if (ok != 0) {
+            //    printf("leveldb open error:%d", ok);
+            //    puts(buf);
+            //    exit(1);
+            //}
+        //}
     }
 
     loop = ev_loop_new(EVBACKEND);
@@ -94,11 +95,11 @@ RLServer::RLServer(const char *_db_path, const char *_hostaddr, int _port, int d
 RLServer::~RLServer(){
     if(db_num<1){
         // delete options[0].filter_policy;
-        delete db[0];
+        //delete db[0];
     }else{
         for(int i=0;i<db_num;i++){
             // delete options[i].filter_policy;
-            delete db[i];
+            //delete db[i];
         }
     }
     // delete[] options;

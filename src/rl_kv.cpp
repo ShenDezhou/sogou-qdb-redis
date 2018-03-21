@@ -26,7 +26,6 @@
 #include "rl_connection.h"
 #include "rl_request.h"
 
-
 void RLRequest::rl_incr(){
 
     if(args.size()!=1){
@@ -38,13 +37,14 @@ void RLRequest::rl_incr(){
     std::string out;
     void* value = reinterpret_cast<void*>(const_cast<char*>(out.data()));
     size_t value_size = 0;
-    struct timeval tv={5,0};
+    //struct timeval tv={5,0};
     int ret;
     // leveldb::Status status;
 
-    // status = connection->server->db[connection->db_index]->Get(connection->server->read_options,
-    //          args[0], &out);
-    ret = connection->server->db[connection->db_index]->get((void *)keyname.c_str(), keyname.size(), value, value_size, &tv);
+    // status = connection->server->db[connection->db_index]->Get(keyname.c_str(), out);
+    
+    //ret = get(keyname.c_str(), out);
+    ret = connection->server->db[connection->db_index]->_get(keyname.c_str(), out);
 
     char *str_oldv=NULL;
     if(ret == -1){
@@ -68,7 +68,8 @@ void RLRequest::rl_incr(){
 
     // status = connection->server->db[connection->db_index]->put(connection->server->write_options,
     //          args[0], leveldb::Slice(str_newv, strlen(str_newv)));
-    ret = connection->server->db[connection->db_index]->put((void *)keyname.c_str(), keyname.size(), (void*)str_newv, (size_t)strlen(str_newv), 0, &tv); 
+    //ret = set(keyname.c_str(), str_newv);
+    ret = connection->server->db[connection->db_index]->_set(keyname.c_str(), str_newv); 
 
     if(!ret) {
         connection->write_error("INCR ERROR 2");
@@ -95,7 +96,8 @@ void RLRequest::rl_incrby(){
     // leveldb::Status status;
     // status = connection->server->db[connection->db_index]->Get(connection->server->read_options,
     //          args[0], &out);
-    ret = connection->server->db[connection->db_index]->get((void *)keyname.c_str(), keyname.size(), value, value_size, &tv);
+    //ret = get(keyname.c_str(), out);
+    ret = connection->server->db[connection->db_index]->_get(keyname.c_str(), out);
 
     mpz_t delta;
     mpz_init(delta);
@@ -124,7 +126,8 @@ void RLRequest::rl_incrby(){
 
     // status = connection->server->db[connection->db_index]->Put(connection->server->write_options,
              // args[0], leveldb::Slice(str_newv, strlen(str_newv)));
-    ret = connection->server->db[connection->db_index]->put((void *)keyname.c_str(), keyname.size(), (void*)str_newv, (size_t)strlen(str_newv), 0, &tv); 
+    //ret = set(keyname.c_str(), str_newv);
+    ret = connection->server->db[connection->db_index]->_set(keyname.c_str(), str_newv); 
 
 
     if(!ret) {
@@ -152,7 +155,8 @@ void RLRequest::rl_get(){
     // leveldb::Status status;
     // status = connection->server->db[connection->db_index]->Get(connection->server->read_options,
     //          args[0], &out);
-    ret = connection->server->db[connection->db_index]->get((void *)keyname.c_str(), keyname.size(), value, value_size, &tv);
+    //ret = get(keyname.c_str(), out);
+    ret = connection->server->db[connection->db_index]->_get(keyname.c_str(), out);
 
     if(ret==-1) {
         connection->write_nil();
@@ -178,7 +182,8 @@ void RLRequest::rl_set(){
     // leveldb::Status status;
     // status = connection->server->db[connection->db_index]->Put(connection->server->write_options,
     //          args[0], args[1]);
-    ret = connection->server->db[connection->db_index]->put((void *)keyname.c_str(), keyname.size(), (void*)valuename.c_str(), valuename.size(), 0, &tv); 
+    //ret = set(keyname.c_str(), valuename);
+    ret = connection->server->db[connection->db_index]->_set(keyname.c_str(), valuename);
 
     if(!ret) {
         connection->write_error("SET ERROR 1");
@@ -204,12 +209,13 @@ void RLRequest::rl_del(){
 
     // status = connection->server->db[connection->db_index]->Get(connection->server->read_options,
     //          args[0], &out);
-    ret = connection->server->db[connection->db_index]->get((void *)keyname.c_str(), keyname.size(), value, value_size, &tv);
+    //ret = get(keyname.c_str(), out);
+    ret = connection->server->db[connection->db_index]->_get(keyname.c_str(), out);
 
     if(ret==-1) {
         connection->write_integer("0", 1);
     } else if(ret==0) {
-        ret = connection->server->db[connection->db_index]->del((void*)keyname.c_str(), keyname.size(), 0, &tv);
+        //ret = connection->server->db[connection->db_index]->del((void*)keyname.c_str(), keyname.size(), 0, &tv);
         if(!ret){
             connection->write_error("DELETE ERROR");
         }else{
@@ -240,7 +246,8 @@ void RLRequest::rl_mget(){
     for(;it!=args.end();it++){
         // status = connection->server->db[connection->db_index]->Get(connection->server->read_options,
         //          *it, &out);
-        ret = connection->server->db[connection->db_index]->get((void *)it->c_str(), it->size(), value, value_size, &tv);
+        //ret = get(it->c_str(), out);
+        ret = connection->server->db[connection->db_index]->_get(it->c_str(), out);
 
         if(ret != 0) {
             connection->write_nil();
@@ -271,7 +278,8 @@ void RLRequest::rl_mset(){
         std::string &valuename = args[i+1];
         // status = connection->server->db[connection->db_index]->Get(connection->server->read_options,
         //          *it, &out);
-        ret = connection->server->db[connection->db_index]->put((void *)keyname.c_str(), keyname.size(), (void*)valuename.c_str(), (size_t)valuename.size(),  0, &tv);
+        //ret = set(keyname.c_str(), valuename);
+        ret = connection->server->db[connection->db_index]->_set(keyname.c_str(), valuename);
     }
 
     // leveldb::Status status = connection->server->db[connection->db_index]->Write(
